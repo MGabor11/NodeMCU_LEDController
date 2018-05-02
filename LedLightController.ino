@@ -1,5 +1,4 @@
 #include <Adafruit_NeoPixel.h>
-#include <ArduinoJson.h>
 #include <ESP8266WiFi.h>
 #include <ESP8266WebServer.h>
 #include <EEPROM.h>
@@ -89,47 +88,32 @@ void loop() {
   }
 }
 
-void generatePixels(){
-  
+void generatePixels() {
+
 }
 
 void setNotification() {
+  StandardRequest request = jsonHandler.getStandardRequest();
 
-  JsonObject& json = jsonHandler.getFromRequest();
-  int notificationType = json["notification_type"];
-  int red = json["red"];
-  int green = json["green"];
-  int blue = json["blue"];
-
-  Serial.println("NOTIFICATION_TYPE: " + String(notificationType) + ", RED: " + String(red) + ",GREEN:" + String(green) + "BLUE: " + String(blue));
+  Serial.println("NOTIFICATION_TYPE: " + String(request.notificationType) + ", RED: " + String(request.red) + ",GREEN:" + String(request.green) + "BLUE: " + String(request.blue));
   //TODO isInfinitePulsing = true; only for testing
   isInfinitePulsing = true;
   isThreadRunning = false;
 
-  ledController.pulse(red, green, blue);
-
-  String output;
-  json.printTo(output);
-  sendResponse(output);
+  ledController.pulse(request.red, request.green, request.blue);
+  sendResponse(jsonHandler.getResponse(request));
 }
 
 void handleManually() {
-  JsonObject& json = jsonHandler.getFromRequest();
-  int brightness = json["brightness"];
-  int red = json["red"];
-  int green = json["green"];
-  int blue = json["blue"];
+  StandardRequest request = jsonHandler.getStandardRequest();
 
-  Serial.println("BRIGHTNESS: " + String(brightness) + ",RED: " + String(red) + ",GREEN:" + String(green) + "BLUE: " + String(blue));
+  Serial.println("BRIGHTNESS: " + String(request.brightness) + ",RED: " + String(request.red) + ",GREEN:" + String(request.green) + "BLUE: " + String(request.blue));
 
   isThreadRunning = false;
   isInfinitePulsing = false;
 
-  ledController.setLightsToBrightness(brightness, red, green, blue);
-
-  String output;
-  json.printTo(output);
-  sendResponse(output);
+  ledController.setLightsToBrightness(request.brightness, request.red, request.green, request.blue);
+  sendResponse(jsonHandler.getResponse(request));
 }
 
 void turnOn() {
