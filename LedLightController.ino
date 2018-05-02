@@ -5,6 +5,7 @@
 #include <EEPROM.h>
 #include "LedController.h"
 #include "constants.h"
+#include "JSONHandler.h"
 
 //Settings constants part
 // ID of the settings block
@@ -36,6 +37,7 @@ ESP8266WebServer server(80);
 boolean isLampOn = false;
 
 LedController ledController = LedController(pixel, Constants::NUMPIXELS);
+JSONHandler jsonHandler = JSONHandler(&server);
 
 void setup() {
   Serial.begin(115200);
@@ -44,7 +46,7 @@ void setup() {
   WiFi.begin("<SSID>", "<PASSWORD>"); //Connect to the WiFi network
 
   while (WiFi.status() != WL_CONNECTED) { //Wait for connection
-    delay(500);
+    delay(Constants::WIFI_CONNECT_DELAY);
     Serial.println("Waiting to connect…");
   }
 
@@ -92,11 +94,8 @@ void generatePixels(){
 }
 
 void setNotification() {
-  DynamicJsonBuffer newBuffer;
-  Serial.println("Request JSON: ");
-  Serial.println(server.arg("plain"));
-  JsonObject& json = newBuffer.parseObject(server.arg("plain"));
 
+  JsonObject& json = jsonHandler.getFromRequest();
   int notificationType = json["notification_type"];
   int red = json["red"];
   int green = json["green"];
@@ -115,12 +114,7 @@ void setNotification() {
 }
 
 void handleManually() {
-  DynamicJsonBuffer newBuffer;
-  Serial.println("Request JSON: ");
-  Serial.println(server.arg("plain"));
-  JsonObject& json = newBuffer.parseObject(server.arg("plain"));
-
-
+  JsonObject& json = jsonHandler.getFromRequest();
   int brightness = json["brightness"];
   int red = json["red"];
   int green = json["green"];
@@ -150,7 +144,6 @@ void turnOff() {
   isLampOn = false;
   isThreadRunning = false;
   isInfinitePulsing = false;
-  //setLightsToBrightness(0, 0, 0, 0);
   ledController.setLightsToBrightness(0, 0, 0, 0);
   sendResponse("{\"led\":\"off\"}");
 }
@@ -170,8 +163,6 @@ void turnOnDefault () {
   sendResponse("{\"notification_type\":\"default\"}");
   startPulseOnThread(Constants::DEFAULT_RED, Constants::DEFAULT_GREEN, Constants::DEFAULT_BLUE);
 }
-
-
 
 void sendResponse(String json) {
   server.sendHeader("Connection", "close");

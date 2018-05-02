@@ -1,7 +1,4 @@
-#include "Arduino.h"
 #include "LedController.h"
-
-#include "Adafruit_NeoPixel.h"
 
 #define MAXIMUM_BRIGHTNESS 70
 #define MINIMUM_BRIGHTNESS 10

@@ -1,11 +1,9 @@
-/*#include "Arduino.h"
-#include "constants.h"*/
-
 namespace Constants {
   //Standard constants
   extern const unsigned char NUMPIXELS(13);    
   extern const unsigned char DEFAULT_BRIGHTNESS(50);
   extern const int PULSING_TIME(10000);
+  extern const int WIFI_CONNECT_DELAY(500);
   
   //GMAIL notification
   extern const unsigned char GMAIL_TYPE(0);
